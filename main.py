@@ -52,8 +52,22 @@ def getrt():
             
     else:
         print(f"Current price of {parameter}: {price}")
-def fundamentals():
-    pass
+
+def balance_sheet():
+    try:
+        stock = yf.Ticker(parameter)
+        balance_sheet = stock.balance_sheet
+        print(balance_sheet)
+    except Exception as e:
+        print(f"Error: {parameter} is not a valid ticker symbol. Please try again")
+
+def financials():
+    try:
+        stock = yf.Ticker(parameter)
+        financials = stock.financials
+        print(financials)
+    except Exception as e:
+        print(f"Error: {parameter} is not a valid ticker symbol. Please try again")
 def goldinfo():
     ticker = 'GC=F'
     stock = yf.Ticker(ticker)
@@ -99,7 +113,11 @@ while True:
     elif command == "exit":
         print("Exiting the program.")
         break
-    elif command == "fundamentals":
-        fundamentals()
+    elif command == "balance_sheet":
+        balance_sheet()
+    elif command == "financials":
+        financials()
     elif command == "goldinfo":
         goldinfo()
+    else:
+        print("Invalid command. Type 'help' to see the list of available commands.")
