@@ -33,6 +33,9 @@ def help():
     print("Available commands:")
     print("get [ticker] [start_date] [end_date] - Get historical data for the specified ticker between the given dates")
     print("getrt [ticker] - Get real-time price for the specified ticker")
+    print("goldinfo - Get the real time price of gold")
+    print("balance_sheet [ticker] - Gives the balance sheet of a stock")
+    print("financials [ticker] - Gives the financials of a stock")
     print("exit - Exit the program")
     
 def get():
