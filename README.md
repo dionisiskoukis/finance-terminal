@@ -1,17 +1,12 @@
 
 # Finance Terminal
 
-
-
-
 ## Features
-
 - A guide to each command of the terminal
 - Access to every stock's price info in real time
 - Ability to check a stock's price during a defined period of time
 - Info about gold
-
-
+- A terminal window specifically for these commands
 
 
 ## Basic Commands (demo)
@@ -41,8 +36,25 @@ Example:
 ```bash
   getrt TSLA
 ```
-- To get info about gold, type:
+- To get the financials of a stock, type:
 
+- To get info about gold, type:
+```bash
+   financials [stock_ticker]
+```
+Example:
+```bash
+  financials MSFT
+```
+- To get the balance sheet of a stock, type:
+```bash
+  balance_sheet [stock_ticker]
+```
+Example:
+```bash
+  balance_sheet AAPL
+```
+- To get info about gold
 ```bash
   goldinfo
 ```
@@ -51,10 +63,12 @@ Example:
 ```bash
   exit
 ```
+## Updades
+- Added new commands (financials, balance_sheet)
+- Created a terminal specifically for this application
 
 ## Future plans
 
- - Creating a terminal outside of vs code, only for the app
  - Ability to download prices of stocks (real time, or from a certain period)
  - Ability to "pin" certain stocks or metals so that when you open the application, you see them without giving any commands
  - Adding more metals to the application
@@ -64,6 +78,4 @@ Example:
 ## License
 
 [MIT](https://choosealicense.com/licenses/mit/)
-
-```
 
