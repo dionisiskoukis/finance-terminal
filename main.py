@@ -77,6 +77,15 @@ def command_processing():
         financials()
     elif command == "goldinfo":
         goldinfo()
+    elif command == "silverinfo":
+        silverinfo()
+    elif command == "copperinfo":
+        copperinfo()
+    elif command == "palladiuminfo":
+        palladiuminfo()
+    elif command == "platinuminfo":
+        platinuminfo()
+
     else:
         to_screen("Invalid command. Type 'help' to see the list of available commands.")
 
@@ -103,6 +112,10 @@ def help():
     to_screen("get [ticker] [start_date] [end_date] - Get historical data for the specified ticker between the given dates")
     to_screen("getrt [ticker] - Get real-time price for the specified ticker")
     to_screen("goldinfo - Get the real time price of gold")
+    to_screen("silverinfo - Get the real time price of silver")
+    to_screen("copperinfo - Get the real time price of copper")
+    to_screen("palladiuminfo - Get the real time price of palladium")
+    to_screen("platinuminfo - Get the real time price of platinum")
     to_screen("balance_sheet [ticker] - Gives the balance sheet of a stock")
     to_screen("financials [ticker] - Gives the financials of a stock")
     to_screen("exit - Exit the program")
@@ -145,9 +158,26 @@ def goldinfo():
     stock = yf.Ticker(ticker)
     gold_price = stock.info['regularMarketPrice']
     to_screen(f"Current price of Gold: {gold_price}")
-
-
-
+def silverinfo():
+    ticker = 'SI=F'
+    stock = yf.Ticker(ticker)
+    silver_price = stock.info['regularMarketPrice']
+    to_screen(f"Current price of Silver: {silver_price}")
+def copperinfo():
+    ticker = 'HG=F'
+    stock = yf.Ticker(ticker)
+    copper_price = stock.info['regularMarketPrice']
+    to_screen(f"Current price of Copper: {copper_price}")
+def palladiuminfo():
+    ticker = 'PA=F'
+    stock = yf.Ticker(ticker)
+    palladium_price = stock.info['regularMarketPrice']
+    to_screen(f"Current price of Palladium: {palladium_price}")
+def platinuminfo():
+    ticker = 'PL=F'
+    stock = yf.Ticker(ticker)
+    platinum_price = stock.info['regularMarketPrice']
+    to_screen(f"Current price of Platinum: {platinum_price}")
 
 
     # Generic if/elif chain is handled inside `command_processing()` via the GUI
