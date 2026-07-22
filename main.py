@@ -1,5 +1,6 @@
 #IMPORTS
 import yfinance as yf
+import xfinance as xf
 import logging
 import sys
 from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QPlainTextEdit, QLineEdit
@@ -75,6 +76,8 @@ def command_processing():
         balance_sheet()
     elif command == "financials":
         financials()
+    elif command == "ticker_info":
+        ticker_info()
     elif command == "goldinfo":
         goldinfo()
     elif command == "silverinfo":
@@ -85,6 +88,10 @@ def command_processing():
         palladiuminfo()
     elif command == "platinuminfo":
         platinuminfo()
+    elif command == "news":
+        news()
+    elif command == "clear":
+        clear()
 
     else:
         to_screen("Invalid command. Type 'help' to see the list of available commands.")
@@ -118,6 +125,7 @@ def help():
     to_screen("platinuminfo - Get the real time price of platinum")
     to_screen("balance_sheet [ticker] - Gives the balance sheet of a stock")
     to_screen("financials [ticker] - Gives the financials of a stock")
+    to_screen("ticker_info [ticker] - Gives the company information of a stock")
     to_screen("exit - Exit the program")
 
 def get():
@@ -178,10 +186,43 @@ def platinuminfo():
     stock = yf.Ticker(ticker)
     platinum_price = stock.info['regularMarketPrice']
     to_screen(f"Current price of Platinum: {platinum_price}")
-
-
+def ticker_info():
+    try:
+        stock = yf.Ticker(parameter)
+        info = stock.info
+        pe_ratio = info.get('trailingPE', 'N/A')
+        to_screen(f"Company: {info['longName']}")
+        to_screen(f"Sector: {info['sector']}")
+        to_screen(f"Industry: {info['industry']}")
+        to_screen(f"Market Cap: {info['marketCap']}")
+        to_screen(f"P/E Ratio: {pe_ratio}")
+        if pe_ratio <= 10:
+            to_screen("The company is either undervalued (a bargain) or in financial trouble.")
+        elif pe_ratio <= 25:
+            to_screen("That's the average cost for most established companies")
+            to_screen("The company has stable, steady growth expectations.")
+        elif pe_ratio > 25:
+            to_screen("Investors expect massive future growth, or the stock is a bubble.")
+        else:
+            to_screen("P/E ratio is not available for this company.")
+    except Exception as e:
+        to_screen(f"Error: {parameter} is not a valid ticker symbol. Please try again.")
     # Generic if/elif chain is handled inside `command_processing()` via the GUI
-
+def clear():
+    display_screen.clear()
+    to_screen("Finance Terminal v1.0")
+    to_screen("If you need help, type 'help' and press Enter to see the available commands.")
+def news():
+    try:
+        stock = yf.Ticker(parameter)
+        news_items = stock.news
+        if len(news_items) != 0:
+            to_screen(f"News for {parameter}:")
+            to_screen(news_items)
+        else:
+            to_screen(f"No news found for {parameter}.")
+    except Exception as e:
+        to_screen(f"Error: {parameter} is not a valid ticker symbol. Please try again.")
 # ==========================================
 # 3. START APP
 # ==========================================
