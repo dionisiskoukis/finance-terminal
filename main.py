@@ -1,4 +1,3 @@
-#IMPORTS
 import yfinance as yf
 import xfinance as xf
 import logging
@@ -6,7 +5,6 @@ import sys
 from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QPlainTextEdit, QLineEdit
 
 logging.getLogger('yfinance').setLevel(logging.CRITICAL)
-
 
 # ==========================================
 # 1. UI SETUP (The visible terminal)
@@ -90,13 +88,12 @@ def command_processing():
         platinuminfo()
     elif command == "news":
         news()
+    elif command == "pin":
+        pin()
     elif command == "clear":
         clear()
-
     else:
         to_screen("Invalid command. Type 'help' to see the list of available commands.")
-
-
 
 
 def one_word_command():
@@ -107,13 +104,14 @@ def two_word_command():
     global command, parameter
     command_split = user_input.split() #splits the variable into a list of strings
     command, parameter = command_split[0], command_split[1] #assigns the splitted strings to variables
-    parameter.capitalize()
+    parameter = parameter.upper() # Assigned back to variable, and used upper() for tickers
 
 def four_word_command():
     global command, parameter, start_date, end_date
     command_split = user_input.split() #splits the variable into a list of strings
-    command, parameter ,start_date, end_date = command_split[0], command_split[1], command_split[2], command_split[3] #assigns the splitted strings to variables
-    parameter.capitalize()
+    command, parameter, start_date, end_date = command_split[0], command_split[1], command_split[2], command_split[3] 
+    parameter = parameter.upper() # Assigned back to variable, and used upper() for tickers
+
 def help():
     to_screen("Available commands:")
     to_screen("get [ticker] [start_date] [end_date] - Get historical data for the specified ticker between the given dates")
@@ -126,6 +124,7 @@ def help():
     to_screen("balance_sheet [ticker] - Gives the balance sheet of a stock")
     to_screen("financials [ticker] - Gives the financials of a stock")
     to_screen("ticker_info [ticker] - Gives the company information of a stock")
+    to_screen("pin [ticker] - Save the ticker and display its current company information")
     to_screen("exit - Exit the program")
 
 def get():
@@ -135,6 +134,7 @@ def get():
         to_screen(data.head())
     except Exception as e:
         to_screen(f"Error, {parameter} is not a valid ticker symbol. Please try again")
+
 def getrt():
     try:
         stock = yf.Ticker(parameter)
@@ -161,31 +161,37 @@ def financials():
         to_screen(financials)
     except Exception as e:
         to_screen(f"Error: {parameter} is not a valid ticker symbol. Please try again")
+
 def goldinfo():
     ticker = 'GC=F'
     stock = yf.Ticker(ticker)
     gold_price = stock.info['regularMarketPrice']
     to_screen(f"Current price of Gold: {gold_price}")
+
 def silverinfo():
     ticker = 'SI=F'
     stock = yf.Ticker(ticker)
     silver_price = stock.info['regularMarketPrice']
     to_screen(f"Current price of Silver: {silver_price}")
+
 def copperinfo():
     ticker = 'HG=F'
     stock = yf.Ticker(ticker)
     copper_price = stock.info['regularMarketPrice']
     to_screen(f"Current price of Copper: {copper_price}")
+
 def palladiuminfo():
     ticker = 'PA=F'
     stock = yf.Ticker(ticker)
     palladium_price = stock.info['regularMarketPrice']
     to_screen(f"Current price of Palladium: {palladium_price}")
+
 def platinuminfo():
     ticker = 'PL=F'
     stock = yf.Ticker(ticker)
     platinum_price = stock.info['regularMarketPrice']
     to_screen(f"Current price of Platinum: {platinum_price}")
+
 def ticker_info():
     try:
         stock = yf.Ticker(parameter)
@@ -196,22 +202,24 @@ def ticker_info():
         to_screen(f"Industry: {info['industry']}")
         to_screen(f"Market Cap: {info['marketCap']}")
         to_screen(f"P/E Ratio: {pe_ratio}")
-        if pe_ratio <= 10:
-            to_screen("The company is either undervalued (a bargain) or in financial trouble.")
-        elif pe_ratio <= 25:
-            to_screen("That's the average cost for most established companies")
-            to_screen("The company has stable, steady growth expectations.")
-        elif pe_ratio > 25:
-            to_screen("Investors expect massive future growth, or the stock is a bubble.")
+        if pe_ratio != 'N/A':
+            if pe_ratio <= 10:
+                to_screen("The company is either undervalued (a bargain) or in financial trouble.")
+            elif pe_ratio <= 25:
+                to_screen("That's the average cost for most established companies")
+                to_screen("The company has stable, steady growth expectations.")
+            elif pe_ratio > 25:
+                to_screen("Investors expect massive future growth, or the stock is a bubble.")
         else:
             to_screen("P/E ratio is not available for this company.")
     except Exception as e:
         to_screen(f"Error: {parameter} is not a valid ticker symbol. Please try again.")
-    # Generic if/elif chain is handled inside `command_processing()` via the GUI
+
 def clear():
     display_screen.clear()
     to_screen("Finance Terminal v1.0")
     to_screen("If you need help, type 'help' and press Enter to see the available commands.")
+
 def news():
     try:
         stock = yf.Ticker(parameter)
@@ -223,6 +231,33 @@ def news():
             to_screen(f"No news found for {parameter}.")
     except Exception as e:
         to_screen(f"Error: {parameter} is not a valid ticker symbol. Please try again.")
+
+def dwnld():
+    pass  # Placeholder for future implementation of a download function
+
+def pin():
+    stock = yf.Ticker(parameter)
+    try:
+        stock_info = stock.info
+        long_name = stock_info.get('longName', 'N/A')
+        sector = stock_info.get('sector', 'N/A')
+        industry = stock_info.get('industry', 'N/A')
+        market_cap = stock_info.get('marketCap', 'N/A')
+        pe_ratio = stock_info.get('trailingPE', 'N/A')
+        
+        with open("pinned_stocks.txt", "a") as file:
+            file.write(parameter + "\n")
+            
+        to_screen(f"Ticker {parameter} has been pinned.")
+        to_screen(f"Company: {long_name}")
+        to_screen(f"Sector: {sector}")
+        to_screen(f"Industry: {industry}")
+        to_screen(f"Market Cap: {market_cap}")
+        to_screen(f"P/E Ratio: {pe_ratio}")
+    except Exception as e:
+        to_screen(f"Error: {parameter} is not a valid ticker symbol. Please try again.")
+def unpin():
+    pass
 # ==========================================
 # 3. START APP
 # ==========================================
@@ -230,6 +265,35 @@ def news():
 typing_bar.returnPressed.connect(command_processing)
 to_screen("Finance Terminal v1.0")
 to_screen("If you need help, type 'help' and press Enter to see the available commands.")
+
+# Single, clean block for reading the pinned stocks at startup
+try:
+    with open("pinned_stocks.txt", "r") as file:
+        pinned_tickers = file.read().splitlines()
+        
+        for ticker in pinned_tickers:
+            ticker = ticker.strip()
+            if ticker: # Skips empty lines
+                stock_info = yf.Ticker(ticker).info
+                long_name = stock_info.get('longName', 'N/A')
+                sector = stock_info.get('sector', 'N/A')
+                industry = stock_info.get('industry', 'N/A')
+                market_cap = stock_info.get('marketCap', 'N/A')
+                pe_ratio = stock_info.get('trailingPE', 'N/A')
+                
+                to_screen("Info pinned from last session.")
+                to_screen("longName: " + str(long_name))
+                to_screen("sector: " + str(sector))
+                to_screen("industry: " + str(industry))
+                to_screen("marketCap: " + str(market_cap))
+                to_screen("trailingPE: " + str(pe_ratio))
+                to_screen(" ")
+                
+except FileNotFoundError:
+    # If the file doesn't exist yet, we just create a blank one 
+    # so the pin() function doesn't crash later.
+    with open("pinned_stocks.txt", "w") as file:
+        pass
 
 window.show()
 typing_bar.setFocus()
