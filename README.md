@@ -66,15 +66,15 @@ Example:
 ## Updades
 - Added new commands (financials, balance_sheet)
 - Created a terminal specifically for this application
+- Added any essential UI
+- Added the pin command
+- Added new metals
 
 ## Future plans
 
  - Ability to download prices of stocks (real time, or from a certain period)
- - Ability to "pin" certain stocks or metals so that when you open the application, you see them without giving any commands
- - Adding more metals to the application
  - Adding more usefull info (dividents, P/E ratio)
-- Automating the fundamental analysis to a certain level
-- Adding UI to the terminal using a library like "rich"
+ - Automating the fundamental analysis to a certain level
 ## License
 
 [MIT](https://choosealicense.com/licenses/mit/)
