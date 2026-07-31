@@ -90,6 +90,10 @@ def command_processing():
         news()
     elif command == "pin":
         pin()
+    elif command == "unpin":
+        unpin()
+    elif command == "licence":
+        licence()
     elif command == "clear":
         clear()
     else:
@@ -125,6 +129,10 @@ def help():
     to_screen("financials [ticker] - Gives the financials of a stock")
     to_screen("ticker_info [ticker] - Gives the company information of a stock")
     to_screen("pin [ticker] - Save the ticker and display its current company information")
+    to_screen("unpin [ticker] - Remove the ticker from the pinned list")
+    to_screen("news [ticker] - Get the latest news for the specified ticker")
+    to_screen("clear - Clear the terminal screen")
+    to_screen("licence - Display the license information")
     to_screen("exit - Exit the program")
 
 def get():
@@ -257,7 +265,42 @@ def pin():
     except Exception as e:
         to_screen(f"Error: {parameter} is not a valid ticker symbol. Please try again.")
 def unpin():
-    pass
+    try:
+        with open("pinned_stocks.txt", "r") as file:
+            pinned_tickers = file.read().splitlines()
+        
+        if parameter in pinned_tickers:
+            pinned_tickers.remove(parameter)
+            with open("pinned_stocks.txt", "w") as file:
+                for ticker in pinned_tickers:
+                    file.write(ticker + "\n")
+            to_screen(f"Ticker {parameter} has been unpinned.")
+        else:
+            to_screen(f"Ticker {parameter} is not pinned.")
+    except Exception as e:
+        to_screen(f"Error: Could not unpin {parameter}. Please try again.")
+def licence():
+    to_screen("Finance Terminal v1.0")
+    to_screen("MIT License")
+    to_screen("")
+    to_screen("Copyright (c) 2026 dionisis koukis")
+    to_screen("Permission is hereby granted, free of charge, to any person obtaining a copy")
+    to_screen("of this software and associated documentation files (the Software), to deal")
+    to_screen("in the Software without restriction, including without limitation the rights")
+    to_screen("to use, copy, modify, merge, publish, distribute, sublicense, and/or sell")
+    to_screen("copies of the Software, and to permit persons to whom the Software is")
+    to_screen("furnished to do so, subject to the following conditions:")
+    to_screen("")
+    to_screen("The above copyright notice and this permission notice shall be included in all")
+    to_screen("copies or substantial portions of the Software.")
+    to_screen("")
+    to_screen("THE SOFTWARE IS PROVIDED AS IS, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR")
+    to_screen("IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,")
+    to_screen("FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE")
+    to_screen("AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER")
+    to_screen("LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,")
+    to_screen("OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE")
+    to_screen("SOFTWARE.")
 # ==========================================
 # 3. START APP
 # ==========================================
