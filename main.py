@@ -12,7 +12,7 @@ logging.getLogger('yfinance').setLevel(logging.CRITICAL)
 app = QApplication(sys.argv)
 
 window = QWidget()
-window.setWindowTitle("Finance Terminal")
+window.setWindowTitle("Finance Terminal v1.1")
 window.resize(800, 500)
 window.setStyleSheet("background-color: black; color: #00FF00; font-family: Consolas;")
 
@@ -94,6 +94,16 @@ def command_processing():
         unpin()
     elif command == "licence":
         licence()
+    elif command == "options":
+        options()
+    elif command == "major_holders":
+        major_holders()
+    elif command == "inst_holders":
+        institutional_holders()
+    elif command == "apt":
+        analysts_price_targets()
+    elif command == "rec":
+        recomendations()
     elif command == "clear":
         clear()
     else:
@@ -131,6 +141,10 @@ def help():
     to_screen("pin [ticker] - Save the ticker and display its current company information")
     to_screen("unpin [ticker] - Remove the ticker from the pinned list")
     to_screen("news [ticker] - Get the latest news for the specified ticker")
+    to_screen("major_holders [ticker] - Shows the major holders of the specified ticker")
+    to_screen("inst_holders [ticker] - Shows the institutional holders of the specified stock")
+    to_screen("apt [ticker] - Shows the analysts's price recomendations of the specified ticker")
+    to_screen("rec [ticker] - Shows te recomendations of the specified ticker")
     to_screen("clear - Clear the terminal screen")
     to_screen("licence - Display the license information")
     to_screen("exit - Exit the program")
@@ -301,12 +315,67 @@ def licence():
     to_screen("LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,")
     to_screen("OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE")
     to_screen("SOFTWARE.")
+def options():
+    try:
+        stock = yf.Ticker(parameter)
+        options = stock.options
+        if options:
+            to_screen(f"Expiry dates for {parameter}:")
+            to_screen(options)
+        else:
+            to_screen(f"No options found for {parameter}.")
+    except Exception as e:
+        to_screen(f"Error: {parameter} is not a valid ticker symbol. Please try again.")
+def major_holders():
+    try:
+        stock = yf.Ticker(parameter)
+        major_holders = stock.major_holders
+        if major_holders is not None and not major_holders.empty:
+            to_screen(f"Major holders for {parameter}:")
+            to_screen(major_holders)
+        else:
+            to_screen(f"No major holders information found for {parameter}.")
+    except Exception as e:
+        to_screen(f"Error: {parameter} is not a valid ticker symbol. Please try again.")
+def institutional_holders():
+    try:
+        stock = yf.Ticker(parameter)
+        institutional_holders = stock.institutional_holders
+        if institutional_holders is not None:
+            to_screen(f"Institutional holders for {parameter}:")
+            to_screen(institutional_holders)
+        else:
+            to_screen(f"No institutional holders information found for {parameter}.")
+    except Exception as e:
+        to_screen(f"Error: {parameter} is not a valid ticker symbol. Please try again.")
+def analysts_price_targets():
+    try:
+        stock = yf.Ticker(parameter)
+        analysts_price_targets = stock.analyst_price_targets
+        if analysts_price_targets is not None and not analysts_price_targets.empty:
+            to_screen(f"Analysts price targets for {parameter}:")
+            to_screen(analysts_price_targets)
+        else:
+            to_screen(f"No analysts price targets found for {parameter}.")
+    except Exception as e:
+        to_screen(f"Error: {parameter} is not a valid ticker symbol. Please try again.")
+def recomendations():
+    try:
+        stock = yf.Ticker(parameter)
+        recommendations = stock.recommendations
+        if recommendations is not None and not recommendations.empty:
+            to_screen(f"Recommendations for {parameter}:")
+            to_screen(recommendations)
+        else:
+            to_screen(f"No recommendations found for {parameter}.")
+    except Exception as e:
+        to_screen(f"Error: {parameter} is not a valid ticker symbol. Please try again.")
 # ==========================================
 # 3. START APP
 # ==========================================
 # Connect the Enter key to the generic function above
 typing_bar.returnPressed.connect(command_processing)
-to_screen("Finance Terminal v1.0")
+to_screen("Finance Terminal v1.1")
 to_screen("If you need help, type 'help' and press Enter to see the available commands.")
 
 # Single, clean block for reading the pinned stocks at startup
