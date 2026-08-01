@@ -1,8 +1,34 @@
+# Finance Terminal v1.2
+# ----UPDATED 2026-08-1----
+# New features:
+# - Added "hca" command to show historical corporate actions (dividends, splits, actions) for a ticker.
+# - Added "index_funds" command to display current prices of major index funds.
+# - Fixed the quarterly financial statements function to handle missing dependencies and session settings more gracefully.
+# - Improved error handling and user feedback for various commands.
+# - Added a check to ensure the 'h2' package is installed for httpx to work properly.
+# - Improved the pinning and unpinning functionality to handle file operations more robustly.
+# - Updated the help command to include new commands and provide clearer instructions.
+# This forces the installation into the EXACT environment running this code
+
 import yfinance as yf
 import xfinance as xf
 import logging
 import sys
 from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QPlainTextEdit, QLineEdit
+import sys
+import subprocess
+import requests
+import httpx
+
+try:
+    import h2
+except ImportError:
+    print("Installing missing h2 package...")
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "httpx[http2]", "h2"])
+    print("Installation complete! Please run the script one more time.")
+    sys.exit()
+
+# --- Your existing function goes below ---
 
 logging.getLogger('yfinance').setLevel(logging.CRITICAL)
 
@@ -12,7 +38,7 @@ logging.getLogger('yfinance').setLevel(logging.CRITICAL)
 app = QApplication(sys.argv)
 
 window = QWidget()
-window.setWindowTitle("Finance Terminal v1.1")
+window.setWindowTitle("Finance Terminal v1.2")
 window.resize(800, 500)
 window.setStyleSheet("background-color: black; color: #00FF00; font-family: Consolas;")
 
@@ -70,10 +96,10 @@ def command_processing():
     elif command == "exit":
         to_screen("Exiting the program.")
         app.quit()
-    elif command == "balance_sheet":
-        balance_sheet()
-    elif command == "financials":
-        financials()
+    elif command == "afs":
+        annual_financial_statements()
+    elif command == "qfs":
+        quarterly_financial_statements()
     elif command == "ticker_info":
         ticker_info()
     elif command == "goldinfo":
@@ -104,8 +130,16 @@ def command_processing():
         analysts_price_targets()
     elif command == "rec":
         recomendations()
+    elif command == "hca":
+        historical_corporate_actions()
     elif command == "clear":
         clear()
+    elif command == "insider_transactions":
+        insider_transactions()
+    elif command == "sustainability":
+        sustainability()
+    elif command == "index_funds":
+        index_funds()
     else:
         to_screen("Invalid command. Type 'help' to see the list of available commands.")
 
@@ -135,8 +169,8 @@ def help():
     to_screen("copperinfo - Get the real time price of copper")
     to_screen("palladiuminfo - Get the real time price of palladium")
     to_screen("platinuminfo - Get the real time price of platinum")
-    to_screen("balance_sheet [ticker] - Gives the balance sheet of a stock")
-    to_screen("financials [ticker] - Gives the financials of a stock")
+    to_screen("afs [ticker] - Gives the annual financial statements of a stock")
+    to_screen("qfs [ticker] - Gives the quarterly financial statements of a stock")
     to_screen("ticker_info [ticker] - Gives the company information of a stock")
     to_screen("pin [ticker] - Save the ticker and display its current company information")
     to_screen("unpin [ticker] - Remove the ticker from the pinned list")
@@ -145,6 +179,10 @@ def help():
     to_screen("inst_holders [ticker] - Shows the institutional holders of the specified stock")
     to_screen("apt [ticker] - Shows the analysts's price recomendations of the specified ticker")
     to_screen("rec [ticker] - Shows te recomendations of the specified ticker")
+    to_screen("insider_transactions [ticker] - Shows the insider transactions of the specified ticker")
+    to_screen("sustainability [ticker] - Shows the sustainability information of the specified ticker")
+    to_screen("hca [ticker] - Shows the historical corporate actions of the specified ticker")
+    to_screen("index_funds - Shows the current prices of major index funds")
     to_screen("clear - Clear the terminal screen")
     to_screen("licence - Display the license information")
     to_screen("exit - Exit the program")
@@ -168,21 +206,97 @@ def getrt():
     else:
         to_screen(f"Current price of {parameter}: {price}")
 
-def balance_sheet():
+def annual_financial_statements():
     try:
-        stock = yf.Ticker(parameter)
+            stock = yf.Ticker(parameter)
+            income_stmt = stock.income_stmt
+            if income_stmt is not None and not income_stmt.empty:
+                to_screen(f"Income statements for {parameter}:")
+                to_screen(income_stmt)
+            else:
+                to_screen(f"No income statements found for {parameter}.")
+    except Exception as e:
+            to_screen(f"Error: {parameter} is not a valid ticker symbol. Please try again.")
+    try:
         balance_sheet = stock.balance_sheet
-        to_screen(balance_sheet)
-    except Exception as e:
-        to_screen(f"Error: {parameter} is not a valid ticker symbol. Please try again")
-
-def financials():
-    try:
         stock = yf.Ticker(parameter)
-        financials = stock.financials
-        to_screen(financials)
+        income_stmt = stock.balance_sheet
+        if balance_sheet is not None and not balance_sheet.empty:
+            to_screen(f"Balance sheet for {parameter}:")
+            to_screen(income_stmt)
+        else:
+            to_screen(f"No balance sheet found for {parameter}.")
     except Exception as e:
-        to_screen(f"Error: {parameter} is not a valid ticker symbol. Please try again")
+            to_screen(f"Error: {parameter} is not a valid ticker symbol. Please try again.")
+    try:
+        cash_flow = stock.cashflow
+    
+        stock = yf.Ticker(parameter)
+        cashflow = stock.cashflow
+        if cashflow is not None and not cashflow.empty:
+            to_screen(f"Cash flow for {parameter}:")
+            to_screen(cashflow)
+        else:
+            to_screen(f"No cash flow found for {parameter}.")
+    except Exception as e:
+            to_screen(f"Error: {parameter} is not a valid ticker symbol. Please try again.")
+
+
+
+
+def quarterly_financial_statements(): 
+    import sys
+    import subprocess
+    import xfinance as xf
+
+    # 1. Force the missing package to install in the EXACT environment running this app
+    try:
+        import h2
+    except ImportError:
+        to_screen("Network fix: Installing missing 'h2' package. Please wait a moment...")
+        try:
+            subprocess.check_call([sys.executable, "-m", "pip", "install", "httpx[http2]", "h2"])
+            to_screen("Installation complete! Proceeding...")
+        except Exception as e:
+            to_screen(f"Failed to auto-install h2: {e}")
+            return
+
+    # 2. Stop setting the session (as the error requested) so the library handles it natively
+    try:
+        stock = xf.Ticker(parameter)
+    except Exception as e:
+        to_screen(f"Error initializing Ticker {parameter}. Details: {e}")
+        return
+
+    try:
+        income_stmt_q = stock.quarterly_income_stmt 
+        if income_stmt_q is not None and not income_stmt_q.empty:
+            to_screen(f"Quarterly income statements for {parameter}:")
+            to_screen(income_stmt_q)
+        else:
+            to_screen(f"No quarterly income statements found for {parameter}.")
+    except Exception as e:
+        to_screen(f"Error retrieving quarterly income statements for {parameter}. Details: {e}")
+
+    try:
+        balance_sheet_q = stock.quarterly_balance_sheet 
+        if balance_sheet_q is not None and not balance_sheet_q.empty:
+            to_screen(f"Quarterly balance sheet for {parameter}:")
+            to_screen(balance_sheet_q)
+        else:
+            to_screen(f"No quarterly balance sheet found for {parameter}.")
+    except Exception as e:
+        to_screen(f"Error retrieving quarterly balance sheet for {parameter}. Details: {e}")
+
+    try:
+        cashflow_q = stock.quarterly_cashflow 
+        if cashflow_q is not None and not cashflow_q.empty:
+            to_screen(f"Quarterly cash flow for {parameter}:")
+            to_screen(cashflow_q)
+        else:
+            to_screen(f"No quarterly cash flow found for {parameter}.")
+    except Exception as e:
+        to_screen(f"Error retrieving quarterly cash flow for {parameter}. Details: {e}")
 
 def goldinfo():
     ticker = 'GC=F'
@@ -278,6 +392,7 @@ def pin():
         to_screen(f"P/E Ratio: {pe_ratio}")
     except Exception as e:
         to_screen(f"Error: {parameter} is not a valid ticker symbol. Please try again.")
+
 def unpin():
     try:
         with open("pinned_stocks.txt", "r") as file:
@@ -293,6 +408,7 @@ def unpin():
             to_screen(f"Ticker {parameter} is not pinned.")
     except Exception as e:
         to_screen(f"Error: Could not unpin {parameter}. Please try again.")
+
 def licence():
     to_screen("Finance Terminal v1.0")
     to_screen("MIT License")
@@ -315,6 +431,7 @@ def licence():
     to_screen("LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,")
     to_screen("OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE")
     to_screen("SOFTWARE.")
+
 def options():
     try:
         stock = yf.Ticker(parameter)
@@ -326,6 +443,7 @@ def options():
             to_screen(f"No options found for {parameter}.")
     except Exception as e:
         to_screen(f"Error: {parameter} is not a valid ticker symbol. Please try again.")
+
 def major_holders():
     try:
         stock = yf.Ticker(parameter)
@@ -337,6 +455,7 @@ def major_holders():
             to_screen(f"No major holders information found for {parameter}.")
     except Exception as e:
         to_screen(f"Error: {parameter} is not a valid ticker symbol. Please try again.")
+
 def institutional_holders():
     try:
         stock = yf.Ticker(parameter)
@@ -348,6 +467,7 @@ def institutional_holders():
             to_screen(f"No institutional holders information found for {parameter}.")
     except Exception as e:
         to_screen(f"Error: {parameter} is not a valid ticker symbol. Please try again.")
+
 def analysts_price_targets():
     try:
         stock = yf.Ticker(parameter)
@@ -359,6 +479,7 @@ def analysts_price_targets():
             to_screen(f"No analysts price targets found for {parameter}.")
     except Exception as e:
         to_screen(f"Error: {parameter} is not a valid ticker symbol. Please try again.")
+
 def recomendations():
     try:
         stock = yf.Ticker(parameter)
@@ -370,12 +491,80 @@ def recomendations():
             to_screen(f"No recommendations found for {parameter}.")
     except Exception as e:
         to_screen(f"Error: {parameter} is not a valid ticker symbol. Please try again.")
+
+def insider_transactions():
+    try:
+        stock = yf.Ticker(parameter)
+        insider_transactions = stock.insider_transactions
+        if insider_transactions is not None and not insider_transactions.empty:
+            to_screen(f"Insider transactions for {parameter}:")
+            to_screen(insider_transactions)
+        else:
+            to_screen(f"No insider transactions found for {parameter}.")
+    except Exception as e:
+        to_screen(f"Error: {parameter} is not a valid ticker symbol. Please try again.")
+
+def sustainability():
+    try:
+        stock = yf.Ticker(parameter)
+        sustainability = stock.sustainability
+        if sustainability is not None and not sustainability.empty:
+            to_screen(f"Sustainability information for {parameter}:")
+            to_screen(sustainability)
+        else:
+            to_screen(f"No sustainability information found for {parameter}.")
+    except Exception as e:
+        to_screen(f"Error: {parameter} is not a valid ticker symbol. Please try again.")
+
+def index_funds():
+    index_funds = ["^GSPC", "^DJI", "^IXIC", "^VIX", "^OEX", "^NYA", "^RUT", "^FTSE", "^N225", "^HSI", "^SSEC", "^BSESN", "^BVSP"]
+    for i in index_funds:
+        try:
+            stock = yf.Ticker(i)
+            price = stock.info['regularMarketPrice']
+            to_screen(f"Current price of {i}: {price}")
+        except Exception as e:
+            to_screen(f"Error: {i} is not a valid ticker symbol. Please try again.")
+
+def historical_corporate_actions():
+    try:
+        stock = yf.Ticker(parameter)
+        dividents = stock.dividends
+        if dividents is not None and not dividents.empty:
+            to_screen(f"Dividends for {parameter}:")
+            to_screen(dividents)
+        else:
+            to_screen(f"No dividents found for {parameter}.")
+    except Exception as e:
+            to_screen(f"Error: {parameter} is not a valid ticker symbol. Please try again.")
+    try:
+        stock = yf.Ticker(parameter)
+        splits = stock.splits
+        if splits is not None and not splits.empty:
+            to_screen(f"Splits for {parameter}:")
+            to_screen(splits)
+        else:
+            to_screen(f"No splits found for {parameter}.")
+    except Exception as e:
+            to_screen(f"Error: {parameter} is not a valid ticker symbol. Please try again.")
+    try:
+        stock = yf.Ticker(parameter)
+        actions = stock.actions
+        if actions is not None and not actions.empty:
+            to_screen(f"Actions for {parameter}:")
+            to_screen(actions)
+        else:
+            to_screen(f"No actions found for {parameter}.")
+    except Exception as e:
+            to_screen(f"Error: {parameter} is not a valid ticker symbol. Please try again.")
+
 # ==========================================
 # 3. START APP
 # ==========================================
 # Connect the Enter key to the generic function above
+
 typing_bar.returnPressed.connect(command_processing)
-to_screen("Finance Terminal v1.1")
+to_screen("Finance Terminal v1.2")
 to_screen("If you need help, type 'help' and press Enter to see the available commands.")
 
 # Single, clean block for reading the pinned stocks at startup
